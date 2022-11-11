@@ -51,78 +51,87 @@ async function fillInitialDataIfFileNotExist():Promise<void>{
         
     })
 }
-async function updateUserByEmail(email: string,name?: string, Gender?:Gender,age?: number):Promise<void>{
-    await fs.readFile(FILE_PATH,"utf-8",(err,data)=>{
-        if(err){
-            console.log(err);
-            return;
-        }
-        const parsedData: User[]=JSON.parse(data);
-        const indexToBeSearched: number=parsedData.findIndex((obj: any)=>{
-          return obj.email===email;
-       })
-       console.log(indexToBeSearched);
-       if(name)
-       {
-        parsedData[indexToBeSearched].name=name;
-       }
-      if(age)
-       {
-        parsedData[indexToBeSearched].age=age;
-       }
-       if(Gender)
-       {
-        parsedData[indexToBeSearched].Gender=Gender;
-    }
-    
-       console.log(parsedData);
-            
-    })
-    return;
-}
 async function createNewUser(newUser: User):Promise<void>{
-       await fs.readFile(FILE_PATH,"utf-8",(err,data)=>{
-            if(err){
-                console.log(err);
-                return;
-            }
-           const parsedData: User[]=JSON.parse(data);
-           const isEmailExist: boolean=parsedData.some((obj: any)=>{
-             return obj.email===newUser.email;
-           })
-          
-          if(isEmailExist){
-            console.log(`User with this ${newUser.email} already exist`);
+    await fs.readFile(FILE_PATH,"utf-8",(err,data: string|Buffer)=>{
+         if(err){
+             console.log(err);
+             return;
+         }
+        const parsedData=JSON.parse(data as string);
+        const isEmailExist: boolean=parsedData.some((obj: any)=>{
+          return obj.email===newUser.email;
+        })
+       
+       if(isEmailExist){
+         console.log(`User with this ${newUser.email} already exist`);
+       }
+       else{
+         const appendedData: User[]=[...parsedData,newUser];
+         fs.writeFile(FILE_PATH,JSON.stringify(appendedData),(err)=>{
+          if(err)
+          {
+              console.log(err);
+              return;
           }
           else{
-            const appendedData: User[]=[...parsedData,newUser];
-            fs.writeFile(FILE_PATH,JSON.stringify(appendedData),(err)=>{
-             if(err)
-             {
-                 console.log(err);
-                 return;
-             }
-             else{
-                 console.log("New user added successfully");
-                 return;
-             }
-            })
+              console.log("New user added successfully");
+              return;
           }
-        })
+         })
+       }
+     })
 }
-async function deleteUserByEmail(email: string)
-{
-    await fs.readFile(FILE_PATH,"utf-8",(err,data)=>{
+async function getAllUserDetails():Promise<void>{
+    await fs.readFile(FILE_PATH,"utf-8",(err,data:string|Buffer)=>{
         if(err){
             console.log(err);
             return;
         }
-       const parsedData: User[]=JSON.parse(data);
+       const parsedData=JSON.parse(data as string);
+      console.log(parsedData);
+    });
+    return;
+}
+
+async function getUserDetailByEmail(email: string):Promise<void>{
+    await fs.readFile(FILE_PATH,"utf-8",(err,data: string| Buffer)=>{
+        if(err){
+            console.log(err);
+            return;
+        }
+       const parsedData=JSON.parse(data as string);
        const indexToBeSearched: number=parsedData.findIndex((obj: any)=>{
          return obj.email===email;
        })
-       parsedData.splice(indexToBeSearched,1);
-       console.log(parsedData);
+       if(indexToBeSearched===-1)
+       {
+        console.log("email not exist");
+       }
+       else{
+        console.log(parsedData[indexToBeSearched]);
+       }       
+    });
+    return;
+}
+
+async function deleteUserByEmail(email: string)
+{
+    await fs.readFile(FILE_PATH,"utf-8",(err,data: string|Buffer)=>{
+        if(err){
+            console.log(err);
+            return;
+        }
+       const parsedData=JSON.parse(data as string);
+       const indexToBeSearched: number=parsedData.findIndex((obj: any)=>{
+         return obj.email===email;
+       })
+       if(indexToBeSearched===-1)
+       {
+        console.log("email not exist");
+       }
+       else{ 
+       console.log(parsedData.splice(indexToBeSearched,1));
+       console.log(JSON.stringify(parsedData));
        fs.writeFile(FILE_PATH,JSON.stringify(parsedData),(err)=>{
         if(err)
         {
@@ -130,59 +139,80 @@ async function deleteUserByEmail(email: string)
             return;
         }
         else{
-            console.log("User deleted added successfully");
+            console.log("User deleted  successfully");
             return;
         }
     })
+} 
     });
     return; 
 }
-async function getAllUserDetails():Promise<void>{
-    await fs.readFile(FILE_PATH,"utf-8",(err,data)=>{
+
+async function updateUserByEmail(email: string, name?: string, Gender?: Gender,age?: number):Promise<void>{
+    await fs.readFile(FILE_PATH,"utf-8",(err,data: string|Buffer)=>{
         if(err){
             console.log(err);
             return;
         }
-       const parsedData: User[]=JSON.parse(data);
-      console.log(parsedData);
-    });
-    return;
-}
-async function getUserDetailByEmail(email: string):Promise<void>{
-    await fs.readFile(FILE_PATH,"utf-8",(err,data)=>{
-        if(err){
-            console.log(err);
-            return;
-        }
-       const parsedData: User[]=JSON.parse(data);
-       const indexToBeSearched: number=parsedData.findIndex((obj: any)=>{
-         return obj.email===email;
+        const parsedData=JSON.parse(data as string);
+        const indexToBeSearched: number=parsedData.findIndex((obj: any)=>{
+          return obj.email===email;
        })
-       console.log(parsedData[indexToBeSearched]);
-    });
+       if(indexToBeSearched===-1)
+       {
+        console.log("email not exist");
+       }
+       else
+       {
+        if(name)
+        {
+            parsedData[indexToBeSearched].name=name;
+        }
+        if(age)
+        {
+            parsedData[indexToBeSearched].age=age;
+        }
+        if(Gender)
+        {
+            parsedData[indexToBeSearched].Gender=Gender;
+        }
+        console.log(parsedData);
+        fs.writeFile(FILE_PATH, JSON.stringify(parsedData),(err)=>{
+            if(err)
+            {
+                console.log(err);
+                return;
+            }
+            else{
+                console.log("User Updated  successfully");
+                return;
+            }
+           })
+       }
+    })
     return;
 }
-console.log(initialValue);
 async function main()
 {
     const isFileExist=await checkFileExist(FILE_PATH);
     if(isFileExist)
     {
         const newUser: User={
-            name:"John",
-            age:24,
-            email:"abc2@gmail.com",
-            Gender:Gender.MALE, 
+            name:"john",
+            age:23,
+            email:"abc3@gmail.com",
+            Gender:Gender.FEMALE, 
         }
-        const emailToBeSearched: string="abc@gmail.com";
-        createNewUser(newUser);
-        getUserDetailByEmail(emailToBeSearched);
-        getAllUserDetails();
+        const emailToBeSearched: string="abc3@gmail.com";
+       await createNewUser(newUser);
+       await getAllUserDetails();
+       await getUserDetailByEmail(emailToBeSearched);
+       await deleteUserByEmail("abc4@gmail.com");
+       await  updateUserByEmail(emailToBeSearched,"john marshal",Gender.MALE,26);
         
-        getAllUserDetails();
     }
     else{
-        fillInitialDataIfFileNotExist();
+     fillInitialDataIfFileNotExist();
     }
 }
 main();

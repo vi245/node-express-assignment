@@ -76,32 +76,6 @@ function fillInitialDataIfFileNotExist() {
         });
     });
 }
-function updateUserByEmail(email, name, Gender, age) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield fs.readFile(FILE_PATH, "utf-8", (err, data) => {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            const parsedData = JSON.parse(data);
-            const indexToBeSearched = parsedData.findIndex((obj) => {
-                return obj.email === email;
-            });
-            console.log(indexToBeSearched);
-            if (name) {
-                parsedData[indexToBeSearched].name = name;
-            }
-            if (age) {
-                parsedData[indexToBeSearched].age = age;
-            }
-            if (Gender) {
-                parsedData[indexToBeSearched].Gender = Gender;
-            }
-            console.log(parsedData);
-        });
-        return;
-    });
-}
 function createNewUser(newUser) {
     return __awaiter(this, void 0, void 0, function* () {
         yield fs.readFile(FILE_PATH, "utf-8", (err, data) => {
@@ -132,33 +106,6 @@ function createNewUser(newUser) {
         });
     });
 }
-function deleteUserByEmail(email) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield fs.readFile(FILE_PATH, "utf-8", (err, data) => {
-            if (err) {
-                console.log(err);
-                return;
-            }
-            const parsedData = JSON.parse(data);
-            const indexToBeSearched = parsedData.findIndex((obj) => {
-                return obj.email === email;
-            });
-            parsedData.splice(indexToBeSearched, 1);
-            console.log(parsedData);
-            fs.writeFile(FILE_PATH, JSON.stringify(parsedData), (err) => {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                else {
-                    console.log("User deleted added successfully");
-                    return;
-                }
-            });
-        });
-        return;
-    });
-}
 function getAllUserDetails() {
     return __awaiter(this, void 0, void 0, function* () {
         yield fs.readFile(FILE_PATH, "utf-8", (err, data) => {
@@ -183,27 +130,104 @@ function getUserDetailByEmail(email) {
             const indexToBeSearched = parsedData.findIndex((obj) => {
                 return obj.email === email;
             });
-            console.log(parsedData[indexToBeSearched]);
+            if (indexToBeSearched === -1) {
+                console.log("email not exist");
+            }
+            else {
+                console.log(parsedData[indexToBeSearched]);
+            }
         });
         return;
     });
 }
-console.log(initialValue);
+function deleteUserByEmail(email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield fs.readFile(FILE_PATH, "utf-8", (err, data) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            const parsedData = JSON.parse(data);
+            const indexToBeSearched = parsedData.findIndex((obj) => {
+                return obj.email === email;
+            });
+            if (indexToBeSearched === -1) {
+                console.log("email not exist");
+            }
+            else {
+                console.log(parsedData.splice(indexToBeSearched, 1));
+                console.log(JSON.stringify(parsedData));
+                fs.writeFile(FILE_PATH, JSON.stringify(parsedData), (err) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    else {
+                        console.log("User deleted  successfully");
+                        return;
+                    }
+                });
+            }
+        });
+        return;
+    });
+}
+function updateUserByEmail(email, name, Gender, age) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield fs.readFile(FILE_PATH, "utf-8", (err, data) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            const parsedData = JSON.parse(data);
+            const indexToBeSearched = parsedData.findIndex((obj) => {
+                return obj.email === email;
+            });
+            if (indexToBeSearched === -1) {
+                console.log("email not exist");
+            }
+            else {
+                if (name) {
+                    parsedData[indexToBeSearched].name = name;
+                }
+                if (age) {
+                    parsedData[indexToBeSearched].age = age;
+                }
+                if (Gender) {
+                    parsedData[indexToBeSearched].Gender = Gender;
+                }
+                console.log(parsedData);
+                fs.writeFile(FILE_PATH, JSON.stringify(parsedData), (err) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+                    else {
+                        console.log("User Updated  successfully");
+                        return;
+                    }
+                });
+            }
+        });
+        return;
+    });
+}
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const isFileExist = yield checkFileExist(FILE_PATH);
         if (isFileExist) {
             const newUser = {
-                name: "John",
-                age: 24,
-                email: "abc2@gmail.com",
-                Gender: Gender.MALE,
+                name: "john",
+                age: 23,
+                email: "abc3@gmail.com",
+                Gender: Gender.FEMALE,
             };
-            const emailToBeSearched = "abc@gmail.com";
-            createNewUser(newUser);
-            getUserDetailByEmail(emailToBeSearched);
-            getAllUserDetails();
-            getAllUserDetails();
+            const emailToBeSearched = "abc3@gmail.com";
+            yield createNewUser(newUser);
+            yield getAllUserDetails();
+            yield getUserDetailByEmail(emailToBeSearched);
+            yield deleteUserByEmail("abc4@gmail.com");
+            yield updateUserByEmail(emailToBeSearched, "john marshal", Gender.MALE, 26);
         }
         else {
             fillInitialDataIfFileNotExist();
